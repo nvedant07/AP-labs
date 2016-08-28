@@ -6,12 +6,21 @@ import java.text.*;
 public class Lab_insurance {
 	void print(vehicle[] arr){
 		for (int i=0;i<6;i++){
-			System.out.println(arr[i].getBrand()+" "+arr[i].getModel()+","+arr[i].owner_name+","+arr[i].number_of_wheels);
+			System.out.print(arr[i].getBrand()+" "+arr[i].getModel()+","+arr[i].owner_name+","+arr[i].number_of_wheels+",");
+			System.out.print(arr[i].getPolicyName()+","+arr[i].getExpiryDate());
+			System.out.println();
+		}
+	}
+	void makeCollisions(vehicle[] arr){
+		for(int i=0;i<6;i++){
+			for(int j=i+1;j<6;j++){
+				
+			}
 		}
 	}
 	public static void main(String[]args){
-		polo car1=new polo("Trendline","Vedant Nanda","01-01-2017","Package Policy");
-		terrano car2=new terrano("Automatic","Regina Phelange","01-01-2015","Package Policy");
+		polo car1=new polo("Polo","Vedant Nanda","01-01-2017","Package Policy");
+		terrano car2=new terrano("Terrano","Regina Phelange","01-01-2015","Package Policy");
 		ktm motorbike1=new ktm("Superduke","Arpan Mondal","07-07-2020","Third Party Policy");
 		hero motorbike2=new hero("Ignitor","Juliana Moore","08-08-2014","Third Party Policy");
 		bwin bike1=new bwin("City","Clive Bixby",null,null);
@@ -23,9 +32,12 @@ public class Lab_insurance {
 		arr[3]=motorbike2;
 		arr[4]=bike1;
 		arr[5]=bike2;
-		System.out.println("Details of vehicles in the system:");
+		System.out.println("Details of vehicles in the system:\n");
 		Lab_insurance l=new Lab_insurance();
 		l.print(arr);
+		System.out.println();
+		System.out.println("Collision Loop:\n");
+		l.makeCollisions(arr);
 	}
 }
 
@@ -41,7 +53,8 @@ abstract class vehicle{
 	public abstract String getModel();
 	public abstract String getExpiryDate();
 	public abstract String getPolicyName();
-//	public abstract void makeclass(String model,String owner_name,String expiry_date,String policy_name);
+	public abstract int CollisionCost();
+	//	public abstract void makeclass(String model,String owner_name,String expiry_date,String policy_name);
 }
 //types of vehicles
 abstract class engine_powered_vehicle extends vehicle{
@@ -50,12 +63,24 @@ abstract class engine_powered_vehicle extends vehicle{
 //manual category
 abstract class manual extends vehicle{
 	policy p=new policy();
+	private int damage_cost=100;
+	public int CollisionCost(){
+		return this.damage_cost;
+	}
 }
 //engine powered categories
 abstract class engine_powered_two_wheelers extends engine_powered_vehicle{
+	private int damage_cost=200;
+	public int CollisionCost(){
+		return this.damage_cost;
+	}
 }
 
 abstract class engine_powered_four_wheelers extends engine_powered_vehicle{
+	private int damage_cost=400;
+	public int CollisionCost(){
+		return this.damage_cost;
+	}
 }
 //specific models
 class polo extends engine_powered_four_wheelers{
