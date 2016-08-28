@@ -1,30 +1,59 @@
-package Group_labs;
-
 import java.util.*;
 import java.text.*;
 
 public class Lab_insurance {
 	void print(vehicle[] arr){
 		for (int i=0;i<6;i++){
-			System.out.print(arr[i].getBrand()+" "+arr[i].getModel()+","+arr[i].owner_name+","+arr[i].number_of_wheels+",");
-			System.out.print(arr[i].getPolicyName()+","+arr[i].getExpiryDate());
+			System.out.print(arr[i].getBrand()+" "+arr[i].getModel()+"\t"+arr[i].owner_name+"\t"+arr[i].number_of_wheels+"\t");
+			System.out.print(arr[i].getPolicyName()+"\t"+arr[i].getExpiryDate());
 			System.out.println();
 		}
 	}
+	
 	void makeCollisions(vehicle[] arr){
+		Date dNow = new Date( );
+		SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd");
 		for(int i=0;i<6;i++){
-			for(int j=i+1;j<6;j++){
-				
+			for(int j=0;j<6;j++){
+				if(j==i)continue;
+				int num=0;
+				System.out.println("I am "+arr[i].owner_name+" and have a "+arr[i].getBrand()+" "+arr[i].getModel()+", collided with "+arr[j].owner_name+" driving a "+arr[j].getBrand()+" "+arr[j].getModel());
+				System.out.println("Damages Self: "+arr[i].CollisionCost());
+				System.out.println("Damages Oncoming: "+arr[j].CollisionCost());
+				if(arr[i].getPolicyName()!=null){
+					if(arr[i].getExpiryDate().compareTo(ft.format(dNow).toString())==1){
+						num++;
+						System.out.println("Settlement Details.");
+						if(arr[i].getPolicyName().equals("Package Policy")){
+							System.out.println("\tPayable oncoming vehicle damages: "+arr[i].CollisionCost()*.2);
+							System.out.println("\tPayable self vehicle damages: "+arr[i].CollisionCost()*.5);
+						}
+						else if(arr[i].getPolicyName().equals("Third Party Policy")){
+							System.out.println("\tPayable oncoming vehicle damages: "+arr[i].CollisionCost()*.2);
+							System.out.println("\tPayable self vehicle damages: "+arr[i].CollisionCost()*1.0);
+						}
+					}
+					try{
+						int num2=1024/num;
+					}catch (ArithmeticException e){
+						System.out.println("Exception is caught: Self policy expired!");
+					}
+				}
+				try{
+					arr[i].getPolicyName().toString();
+				}catch(NullPointerException e){
+					System.out.println("Exception is caught: Self does not have a policy!");
+				}
 			}
 		}
 	}
 	public static void main(String[]args){
-		polo car1=new polo("Polo","Vedant Nanda","01-01-2017","Package Policy");
-		terrano car2=new terrano("Terrano","Regina Phelange","01-01-2015","Package Policy");
-		ktm motorbike1=new ktm("Superduke","Arpan Mondal","07-07-2020","Third Party Policy");
-		hero motorbike2=new hero("Ignitor","Juliana Moore","08-08-2014","Third Party Policy");
+		polo car1=new polo("Polo","Vedant Nanda","2017-01-01","Package Policy");
+		terrano car2=new terrano("Terrano","Regina Phelange","2015-02-27","Package Policy");
+		ktm motorbike1=new ktm("Superduke","Arpan Mondal","2020-07-15","Third Party Policy");
+		hero motorbike2=new hero("Ignitor","Juliana Moore","2014-12-26","Third Party Policy");
 		bwin bike1=new bwin("City","Clive Bixby",null,null);
-		firefox bike2=new firefox("Mountain","Phil Dunphy",null,null);
+		firefox bike2=new firefox("Domane","Phil Dunphy",null,null);
 		vehicle[] arr=new vehicle[6];
 		arr[0]=car1;
 		arr[1]=car2;
@@ -63,21 +92,27 @@ abstract class engine_powered_vehicle extends vehicle{
 //manual category
 abstract class manual extends vehicle{
 	policy p=new policy();
-	private int damage_cost=100;
+	Random rand=new Random();
+	int rn=rand.nextInt(450 + 1) + 50;
+	private int damage_cost=rn-(rn%10);
 	public int CollisionCost(){
 		return this.damage_cost;
 	}
 }
 //engine powered categories
 abstract class engine_powered_two_wheelers extends engine_powered_vehicle{
-	private int damage_cost=200;
+	Random rand=new Random();
+	int rn=rand.nextInt(2500 + 1) + 500;
+	private int damage_cost=rn-(rn%100);
 	public int CollisionCost(){
 		return this.damage_cost;
 	}
 }
 
 abstract class engine_powered_four_wheelers extends engine_powered_vehicle{
-	private int damage_cost=400;
+	Random rand=new Random();
+	int rn=rand.nextInt(8000 + 1) + 2000;
+	private int damage_cost=rn-(rn%500);
 	public int CollisionCost(){
 		return this.damage_cost;
 	}
