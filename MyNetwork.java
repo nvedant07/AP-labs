@@ -1,3 +1,9 @@
+/*
+	@Authors:
+	* Vedant Nanda - 2015114
+	* Arpan Mondal - 2015132
+ */
+
 package Group_labs;
 
 import java.util.*;
@@ -7,7 +13,7 @@ public class MyNetwork {
 	//arpan code
 	static ArrayList persons=new ArrayList();
 	static int size=0;
-	static boolean logged_in=false;
+	static int logged_in=-1;
 	static String logged_in_username;
 	public void reader(String file){
 		persons.clear();
@@ -41,7 +47,38 @@ public class MyNetwork {
 			System.exit(0);
 		}
 	}
-
+	
+	public static void update() throws IOException{
+		PrintWriter pw = new PrintWriter("input.txt");
+		pw.close();
+		for(int i=0;i<persons.size();i++){
+			Person new_user=(Person)persons.get(i);
+			String friends_name="",pending="";
+			for(int j=0;j<new_user.friends.size();j++){
+				friends_name+=new_user.friends.get(j);
+				friends_name+=",";
+			}
+			for(int j=0;j<new_user.pending.size();j++){
+				pending+=new_user.pending.get(j);
+				pending+=",";
+			}
+			String user=new_user.get_username()+","+new_user.get_password()+","+new_user.get_display_name()+","+new_user.get_number_of_friends()+","+friends_name+new_user.get_number_pending_requests()+","+pending+new_user.get_status();
+			String filename= "input.txt";
+			FileWriter fw=new FileWriter(filename,true);
+			try
+			{
+			    fw.write(user+"\n");
+			}
+			catch(IOException ioe)
+			{
+			    System.err.println("IOException: " + ioe.getMessage());
+			}
+			finally{
+				fw.close();
+			}
+		}
+	}
+	
 	public void login(){
 		Scanner in=new Scanner(System.in);
 		System.out.println("Please enter your username: ");
@@ -56,11 +93,11 @@ public class MyNetwork {
 			if (current.get_username().equals(name) && current.get_password().equals(pass)){
 				System.out.println("You have succesfully logged in " + current.get_display_name());
 				System.out.println(current.get_status());
-				logged_in=true;
+				logged_in=i;
 				logged_in_username=current.get_username();
 			}
 		}
-		if(!logged_in){
+		if(logged_in<0){
 			System.out.println("Username and password do not match");
 		}
 	}
@@ -405,7 +442,7 @@ public class MyNetwork {
 				n.reader("input.txt");
 				n.login();
 			}
-			while(logged_in){
+			while(logged_in>=0){
 				System.out.println("    1.List Friends");
 				System.out.println("    2.Search");
 				System.out.println("    3.Update Status");
@@ -425,8 +462,78 @@ public class MyNetwork {
 					String name=in.nextLine();
 					n.search(name);
 				}
+				if(a==3){
+					MyNetwork n=new MyNetwork();
+					n.reader("input.txt");
+					Person iter=(Person)persons.get(logged_in);
+					System.out.println("Enter new status: ");
+					String garbage=in.nextLine();
+					String str=in.nextLine();
+					iter.set_status(str);
+					persons.set(logged_in, iter);
+					try{
+						update();
+					}
+					catch(IOException ioe){
+				    System.err.println("IOException: " + ioe.getMessage());
+					}
+					System.out.println("Status Updated!");
+				}
+				foo:{if(a==4){
+					MyNetwork n=new MyNetwork();
+					n.reader("input.txt");
+					Person iter=(Person)persons.get(logged_in);
+					System.out.print("You have "+iter.get_number_pending_requests()+" friend requests");
+					if(iter.get_number_pending_requests()==0){
+						System.out.println("!");
+					}
+					else{	
+						System.out.println(":");
+						int j;
+						for(j=0;j<iter.pending.size();j++){
+							System.out.println((j+1)+". "+iter.pending.get(j));
+						}
+						System.out.println("b. back");
+						System.out.print("Enter number: ");
+						String st=in.next();
+						char opt=st.charAt(0);
+						if(opt=='b')break foo;
+						int pend = Integer.parseInt(st);
+						System.out.print(iter.pending.get(pend-1));
+						System.out.println("Enter choice: \n\t1.Accept\n\t2.Reject\n\t");
+						int choi=in.nextInt();
+						if(choi==1){
+							for(int i=0;i<persons.size();i++){
+								Person fri = (Person)persons.get(i);
+								if (fri.get_username().equals(iter.pending.get(pend-1))){
+									iter.friends.add(fri.get_username());
+									iter.set_number_of_friends(iter.get_number_of_friends()+1);
+									iter.set_number_pending_requests(iter.get_number_pending_requests()-1);
+									iter.pending.remove(pend-1);
+									fri.friends.add(iter.get_username());
+									fri.set_number_of_friends(fri.get_number_of_friends()+1);
+								}
+							}
+							System.out.println("You are now friends with "+iter.friends.get(iter.get_number_of_friends()-1));
+						}
+						else if(choi==2){
+							iter.set_number_pending_requests(iter.get_number_pending_requests()-1);
+							iter.pending.remove(pend-1);
+							System.out.println("Friend Request Rejected");
+						}
+						else{
+							break;
+						}
+						try{
+							update();
+						}
+						catch(IOException ioe){
+					    System.err.println("IOException: " + ioe.getMessage());
+						}
+					}
+				}}
 				if(a==5){
-					logged_in=false;
+					logged_in=-1;
 					logged_in_username=null;
 					System.out.println("    1.Sign Up");
 					System.out.println("    2.Login");
