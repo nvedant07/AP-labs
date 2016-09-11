@@ -8,7 +8,9 @@ public class MyNetwork {
 	static ArrayList persons=new ArrayList();
 	static int size=0;
 	static boolean logged_in=false;
+	static String logged_in_username;
 	public void reader(String file){
+		persons.clear();
 		File database = new File(file);
 		String thisLine = null;
 		try {			
@@ -29,6 +31,7 @@ public class MyNetwork {
 				for(int i=4+friends; i<(5+friends+requests); i++){
 					p.pending.add(array[i]);
 				}
+				p.set_status(array[3+1+friends+1+requests]);
 				persons.add(p);
 			}
 			
@@ -56,7 +59,9 @@ public class MyNetwork {
 //			System.out.println(current.username+" "+name);
 			if (current.get_username().equals(name) && current.get_password().equals(pass)){
 				System.out.println("You have succesfully logged in " + current.get_display_name());
+				System.out.println(current.get_status());
 				logged_in=true;
+				logged_in_username=current.get_username();
 			}
 		}
 		if(!logged_in){
@@ -93,6 +98,21 @@ public class MyNetwork {
 			System.out.println("Username already exists!");
 		}
 	}
+	
+	public void list_friends(){
+		for(int i=0;i<persons.size();i++){
+			Person iter=(Person)persons.get(i);
+//			System.out.println(iter.get_username());
+			if(iter.get_username().equals(logged_in_username)){
+				System.out.print("Your friends are: ");
+				for(int j=0;j<iter.friends.size();j++){
+					System.out.print(iter.friends.get(j)+" ");
+				}
+				System.out.println();
+			}
+		}
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Reading database file...");
 		System.out.println("Network is ready.");
@@ -114,9 +134,6 @@ public class MyNetwork {
 				System.out.println("Enter Password ");
 				String password=in.nextLine();
 				Person anon=new Person(0,0,username,password,display_name);
-//				anon.username=username;
-//				anon.display_name=display_name;
-//				anon.password=password;
 				anon.set_status("<add a status>");
 				try{
 					n.add_user(anon);
@@ -133,6 +150,38 @@ public class MyNetwork {
 				MyNetwork n=new MyNetwork();
 				n.reader("input.txt");
 				n.login();
+			}
+			while(logged_in){
+				System.out.println("    1.List Friends");
+				System.out.println("    2.Search");
+				System.out.println("    3.Update Status");
+				System.out.println("    4.Pending request");
+				System.out.println("    5.logout");
+				a=in.nextInt();
+				if(a==1){
+					MyNetwork n=new MyNetwork();
+					n.reader("input.txt");
+					n.list_friends();
+				}
+				if(a==2){
+					MyNetwork n=new MyNetwork();
+					n.reader("input.txt");
+					System.out.println("Enter name:");
+					String name=in.nextLine();
+					n.search(name);//to be implemented
+					char a=in.nextChar();
+					if(a=='1'){
+						n.send_request(name);//to be implemented
+						a=in.nextChar();
+						if(a=='1'){
+							n.cancel_request(name);//to be implemented
+						}
+					}
+				}
+				if(a==5){
+					logged_in=false;
+					logged_in_username=null;
+				}
 			}
 		}
 	}
