@@ -178,7 +178,8 @@ public class MyNetwork {
 			}
 			MyNetwork n=new MyNetwork();
 //			System.out.println(n.shortest_path());
-			System.out.println("Shortest Path:TBD");
+			n.shortest_path(name);
+//			System.out.println("Shortest Path:TBD");
 			for(int i=0;i<searched.pending.size();i++){
 				if(logged_in_username.equals(searched.pending.get(i))){
 					pending=true;
@@ -305,6 +306,67 @@ public class MyNetwork {
 		}
 	}
 	
+	public int find_pos(String username){
+		int pos=0;
+		for(int i=0;i<persons.size();i++){
+			Person iter=(Person)persons.get(i);
+			if(iter.get_username().equals(username)){
+				pos = i;
+			}
+		}
+		return pos;
+	}
+	
+	public void shortest_path(String name){
+//		MyNetwork m=new MyNetwork();
+		int start_pos=find_pos(logged_in_username);
+		
+		boolean visited[] = new boolean[persons.size()];
+		 
+        LinkedList<Integer> queue = new LinkedList<Integer>();
+ 
+        visited[start_pos]=true;
+        queue.add(start_pos);
+ 
+        while (queue.size() != 0)
+        {
+            start_pos = queue.poll();
+            Person iter=(Person)persons.get(start_pos);
+            for(int i=0;i<iter.friends.size();i++){
+            	int n=find_pos((String)iter.friends.get(i));
+            	if(!visited[n]){
+            		visited[n] = true;
+            		Person temp=(Person)persons.get(n);
+            		temp.parent=start_pos;
+            		persons.set(n,temp);
+                    queue.add(n);
+            	}
+            }
+        }
+        System.out.print("Shortest Path: ");
+        print_path(find_pos(logged_in_username),find_pos(name));
+        System.out.println();
+	}
+	
+	public void print_path(int start,int end){
+		ArrayList path=new ArrayList();
+		
+		Person s=(Person)persons.get(start);
+		Person v=(Person)persons.get(end);
+		
+		if(v.get_username().equals(s.get_username())){
+			System.out.print(v.get_username()+"->");
+		}
+		else if(v.parent==-1){
+			System.out.print("No path exists!");
+		}
+		else{
+			print_path(start,v.parent);
+			System.out.print(v.get_username()+"->");
+		}
+		
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Reading database file...");
 		System.out.println("Network is ready.");
@@ -322,7 +384,7 @@ public class MyNetwork {
 				String username=in.nextLine();
 				System.out.println("Enter Display Name ");
 				String display_name=in.nextLine();
-				System.out.println(display_name);
+//				System.out.println(display_name);
 				System.out.println("Enter Password ");
 				String password=in.nextLine();
 				Person anon=new Person(0,0,username,password,display_name);
@@ -383,6 +445,7 @@ class Person{
 	private int number_pending_requests;//setter needed
 	ArrayList pending=new ArrayList();//setter needed
 	private String status;//setter needed
+	int parent=-1;
 	
 	public Person(int a,int b,String username,String password,String display_name){
 		this.number_of_friends=a;
