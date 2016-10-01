@@ -79,7 +79,7 @@ public class MyNetwork {
 		}
 	}
 	
-	public void login(){
+	public void login() throws Exception{
 		Scanner in=new Scanner(System.in);
 		System.out.println("Please enter your username: ");
 //		String garbage=in.nextLine();
@@ -98,11 +98,12 @@ public class MyNetwork {
 			}
 		}
 		if(logged_in<0){
-			System.out.println("Username and password do not match");
+			throw new MatchingException();			
+//			System.out.println("Username and password do not match");
 		}
 	}
 	//end arpan code
-	public void add_user(Person new_user) throws IOException{
+	public void add_user(Person new_user) throws IOException,Exception{
 		String user=new_user.get_username()+","+new_user.get_password()+","+new_user.get_display_name()+","+new_user.get_number_of_friends()+","+new_user.get_number_pending_requests()+","+new_user.get_status();
 		int flag=0;
 		for(int i=0;i<persons.size();i++){
@@ -128,7 +129,8 @@ public class MyNetwork {
 
 		}
 		else{
-			System.out.println("Username already exists!");
+			throw new ExistsException();
+//			System.out.println("Username already exists!");
 		}
 	}
 	
@@ -146,9 +148,10 @@ public class MyNetwork {
 		}
 	}
 	
-	public void search(String name){
+	public void search(String name) throws Exception{
 		boolean friend=false;
 		boolean pending=false;
+		boolean exists=false;
 		Scanner in=new Scanner(System.in);
 		Person user=new Person(0,0,"","","");
 		Person searched=new Person(0,0,"","","");
@@ -157,6 +160,7 @@ public class MyNetwork {
 		for(int i=0;i<persons.size();i++){
 			Person iter=(Person)persons.get(i);
 			if(iter.get_username().equals(name)){
+				exists=true;
 				for(int j=0;j<iter.friends.size();j++){
 					if(logged_in_username.equals(iter.friends.get(j))){
 						friend=true;
@@ -164,96 +168,100 @@ public class MyNetwork {
 				}
 			}
 		}
-
-		for(int i=0;i<persons.size();i++){
-			Person iter=(Person)persons.get(i);
-			if(name.equals(iter.get_username())){
-				searched=iter;
-			}
-			if(logged_in_username.equals(iter.get_username())){
-				user=iter;
-			}
-		}
-		
-		for(int i=0;i<user.friends.size();i++){
-			for(int j=0;j<searched.friends.size();j++){
-				if(user.friends.get(i).equals(searched.friends.get(j))){
-					mutual_friends.add(user.friends.get(i));
+		if(exists){
+			for(int i=0;i<persons.size();i++){
+				Person iter=(Person)persons.get(i);
+				if(name.equals(iter.get_username())){
+					searched=iter;
+				}
+				if(logged_in_username.equals(iter.get_username())){
+					user=iter;
 				}
 			}
-		}
-		
-		if(friend){
-			System.out.println("You and "+name+" are friends.\n");
-			System.out.println("Display name: "+searched.get_display_name());
-			System.out.println("Status: "+searched.get_status());
-			System.out.print("Friends: ");
-			for(int i=0;i<searched.friends.size();i++){
-				System.out.print(searched.friends.get(i)+" ");
+			
+			for(int i=0;i<user.friends.size();i++){
+				for(int j=0;j<searched.friends.size();j++){
+					if(user.friends.get(i).equals(searched.friends.get(j))){
+						mutual_friends.add(user.friends.get(i));
+					}
+				}
 			}
-			System.out.println();
-			System.out.print("Mutual Friends: ");
-			if(mutual_friends.size()==0)System.out.println("No mutual friends");
-			else{
-				for(int i=0;i<mutual_friends.size();i++){
-					System.out.print(mutual_friends.get(i)+" ");
+			
+			if(friend){
+				System.out.println("You and "+name+" are friends.\n");
+				System.out.println("Display name: "+searched.get_display_name());
+				System.out.println("Status: "+searched.get_status());
+				System.out.print("Friends: ");
+				for(int i=0;i<searched.friends.size();i++){
+					System.out.print(searched.friends.get(i)+" ");
 				}
 				System.out.println();
+				System.out.print("Mutual Friends: ");
+				if(mutual_friends.size()==0)System.out.println("No mutual friends");
+				else{
+					for(int i=0;i<mutual_friends.size();i++){
+						System.out.print(mutual_friends.get(i)+" ");
+					}
+					System.out.println();
+				}
+				System.out.println("    b.Back");
+				char opt=in.next().charAt(0);
 			}
-			System.out.println("    b.Back");
-			char opt=in.next().charAt(0);
+			else{
+				System.out.println(name+" is not a friend");
+				System.out.print("Mutual Friends: ");
+				if(mutual_friends.size()==0)System.out.println("No mutual friends");
+				else{
+					for(int i=0;i<mutual_friends.size();i++){
+						System.out.print(mutual_friends.get(i)+" ");
+					}
+					System.out.println();
+				}
+				MyNetwork n=new MyNetwork();
+//				System.out.println(n.shortest_path());
+				n.shortest_path(name);
+//				System.out.println("Shortest Path:TBD");
+				for(int i=0;i<searched.pending.size();i++){
+					if(logged_in_username.equals(searched.pending.get(i))){
+						pending=true;
+					}
+				}
+				if(pending){
+					System.out.println("Request Pending.\n");
+					System.out.println("    1.Cancel request");
+					System.out.println("    b.Back");
+					char opt=in.next().charAt(0);
+					if(opt=='1'){
+						try{
+							n.cancel_request(name);
+						}
+						catch(IOException ioe)
+						{
+						    System.err.println("IOException: " + ioe.getMessage());
+						}
+						System.out.println("Request cancelled.");
+					}
+				}
+				else{
+					System.out.println("    1.Send request");
+					System.out.println("    b.Back");
+					char opt=in.next().charAt(0);
+					if(opt=='1'){
+						try{
+							n.send_request(name);
+						}
+						catch(IOException ioe)
+						{
+						    System.err.println("IOException: " + ioe.getMessage());
+						}
+						System.out.println("Request sent.");
+						n.search(name);
+					}
+				}
+			}
 		}
 		else{
-			System.out.println(name+" is not a friend");
-			System.out.print("Mutual Friends: ");
-			if(mutual_friends.size()==0)System.out.println("No mutual friends");
-			else{
-				for(int i=0;i<mutual_friends.size();i++){
-					System.out.print(mutual_friends.get(i)+" ");
-				}
-				System.out.println();
-			}
-			MyNetwork n=new MyNetwork();
-//			System.out.println(n.shortest_path());
-			n.shortest_path(name);
-//			System.out.println("Shortest Path:TBD");
-			for(int i=0;i<searched.pending.size();i++){
-				if(logged_in_username.equals(searched.pending.get(i))){
-					pending=true;
-				}
-			}
-			if(pending){
-				System.out.println("Request Pending.\n");
-				System.out.println("    1.Cancel request");
-				System.out.println("    b.Back");
-				char opt=in.next().charAt(0);
-				if(opt=='1'){
-					try{
-						n.cancel_request(name);
-					}
-					catch(IOException ioe)
-					{
-					    System.err.println("IOException: " + ioe.getMessage());
-					}
-					System.out.println("Request cancelled.");
-				}
-			}
-			else{
-				System.out.println("    1.Send request");
-				System.out.println("    b.Back");
-				char opt=in.next().charAt(0);
-				if(opt=='1'){
-					try{
-						n.send_request(name);
-					}
-					catch(IOException ioe)
-					{
-					    System.err.println("IOException: " + ioe.getMessage());
-					}
-					System.out.println("Request sent.");
-					n.search(name);
-				}
-			}
+			throw new SearchException(name);
 		}
 	}
 	
@@ -433,6 +441,9 @@ public class MyNetwork {
 				{
 				    System.err.println("IOException: " + ioe.getMessage());
 				}
+				catch(Exception e){
+					System.out.println(e.toString());
+				}
 				System.out.println("    1.Sign Up");
 				System.out.println("    2.Login");
 				a=in.nextInt();
@@ -440,7 +451,12 @@ public class MyNetwork {
 			if (a==2){
 				MyNetwork n=new MyNetwork();
 				n.reader("input.txt");
-				n.login();
+				try{
+					n.login();
+				}
+				catch(Exception e){
+					System.out.println(e.toString());
+				}
 			}
 			while(logged_in>=0){
 				System.out.println("    1.List Friends");
@@ -460,7 +476,12 @@ public class MyNetwork {
 					System.out.println("Enter name:");
 					in.nextLine();
 					String name=in.nextLine();
-					n.search(name);
+					try{
+						n.search(name);
+					}
+					catch(Exception e){
+						System.out.println(e.toString());
+					}
 				}
 				if(a==3){
 					MyNetwork n=new MyNetwork();
