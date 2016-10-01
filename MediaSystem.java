@@ -26,7 +26,14 @@ public class MediaSystem {
     		String line;
     		while ((line = br.readLine()) != null){
     			String[] arr = line.split(",");
-    			songs.add(new Song(arr[0],arr[2],Integer.parseInt(arr[3]),arr[4],Float.parseFloat(arr[5]),Integer.parseInt(arr[6]),arr[7]));
+    			Movie film;
+    			for(Movie films:movies){
+            		if(arr[1].equals(films.gettitle())){
+            			film=films;
+            			break;
+            		}
+        		}
+    			songs.add(new Song(arr[0], film, arr[2],Integer.parseInt(arr[3]),arr[4],Float.parseFloat(arr[5]),Integer.parseInt(arr[6]),arr[7]));
     		}
    			br.close();
   		}	
@@ -50,6 +57,10 @@ class Media implements java.io.Serializable{
 	protected int rating;
 	protected String duration;
 	protected String genre;
+
+	public String gettitle(){
+		return this.title;
+	}
 
 	@Override
 	public int hashCode(){
@@ -88,6 +99,18 @@ class Movie extends Media{
 		this.certification=certificate;
 	}
 }
+
 class Song extends Media{
 	private Movie m;
+
+	Song(String name, Movie film, String actor, int release, String type, float space, int stars, String time){
+		this.title=name;
+		this.m=film;
+		this.artist=actor;
+		this.year=release;
+		this.genre=type;
+		this.size=space;
+		this.rating=stars;
+		this.duration=time;
+	}
 }
