@@ -1,26 +1,41 @@
-
+import java.util.*;
+import java.lang.*;
+import java.io.*;
 
 public class MediaSystem {
 
-	public static void readFileByLine(String fileName) {
-  		try{
-   			File file = new File(fileName);
-   			Scanner scanner = new Scanner(file);
-   			String s = new String();
-   			while (scanner.hasNext()) {
-    			s=scanner.next();
-    			String[] arr = thisLine.split(",");
-    			Movie M = new Movie(arr[0],arr[1],Integer.parseInt(arr[2]),arr[3],Integer.parsefloat(arr[4]),Integer.parseInt(arr[5]),arr[6],arr[7],arr[8],arr[9]);
-   			}
-   		scanner.close();
-  		}
-  		catch (FileNotFoundException e) {
-   			e.printStackTrace();
-  		} 
+	static HashSet<Movie> movies = new HashSet<Movie>();
+	static HashSet<Song> songs = new HashSet<Song>();
+	
+	public static void readmovie(String file) {
+   		try(BufferedReader br = new BufferedReader(new FileReader(file))) {
+    		String line;
+    		while ((line = br.readLine()) != null){
+    			String[] arr = line.split(",");
+    			movies.add(new Movie(arr[0],arr[1],Integer.parseInt(arr[2]),arr[3],Float.parseFloat(arr[4]),Integer.parseInt(arr[5]),arr[6],arr[7],arr[8],arr[9].charAt(0)));
+    		}
+   			br.close();
+  		}	
+  		catch(Exception e){
+        	e.printStackTrace();
+      } 
+	}
+
+	public static void readsong(String file) {
+   		try(BufferedReader br = new BufferedReader(new FileReader(file))) {
+    		String line;
+    		while ((line = br.readLine()) != null){
+    			String[] arr = line.split(",");
+    			songs.add(new Song(arr[0],arr[2],Integer.parseInt(arr[3]),arr[4],Float.parseFloat(arr[5]),Integer.parseInt(arr[6]),arr[7]));
+    		}
+   			br.close();
+  		}	
+  		catch(Exception e){
+        	e.printStackTrace();
+      } 
 	}
 
 	public static void main(String[] args) {
-		//Set<Media> set = new Hashset<Media>();
 
 
 	}
@@ -35,8 +50,26 @@ class Media implements java.io.Serializable{
 	protected int rating;
 	protected String duration;
 	protected String genre;
+
+	@Override
+	public int hashCode(){
+        String str=this.title;
+        return str.hashCode();
+    }
+
+    @Override 
+    public boolean equals(Object obj){
+        System.out.println("In equals");
+        if (obj instanceof Media) {
+            Media pp = (Media) obj;
+            return (pp.title.equals(this.title));
+        } else {
+            return false;
+        }
+    }
 	
 }
+
 class Movie extends Media{
 	private String director;
 	private String producer;
